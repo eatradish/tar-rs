@@ -449,11 +449,11 @@ impl<'a> EntryFields<'a> {
 
         if kind.is_dir() {
             self.unpack_dir(dst)?;
-            if let Ok(mode) = self.header.mode() {
-                set_perms(dst, None, mode, self.preserve_permissions)?;
-            }
             if self.preserve_ownerships {
                 set_ownerships(dst, None, self.header.uid().ok(), self.header.gid().ok())?;
+            }
+            if let Ok(mode) = self.header.mode() {
+                set_perms(dst, None, mode, self.preserve_permissions)?;
             }
             return Ok(Unpacked::__Nonexhaustive);
         } else if kind.is_hard_link() || kind.is_symlink() {
@@ -557,11 +557,11 @@ impl<'a> EntryFields<'a> {
         // Only applies to old headers.
         if self.header.as_ustar().is_none() && self.path_bytes().ends_with(b"/") {
             self.unpack_dir(dst)?;
-            if let Ok(mode) = self.header.mode() {
-                set_perms(dst, None, mode, self.preserve_permissions)?;
-            }
             if self.preserve_ownerships {
                 set_ownerships(dst, None, self.header.uid().ok(), self.header.gid().ok())?;
+            }
+            if let Ok(mode) = self.header.mode() {
+                set_perms(dst, None, mode, self.preserve_permissions)?;
             }
             return Ok(Unpacked::__Nonexhaustive);
         }
@@ -639,9 +639,6 @@ impl<'a> EntryFields<'a> {
                 })?;
             }
         }
-        if let Ok(mode) = self.header.mode() {
-            set_perms(dst, Some(&mut f), mode, self.preserve_permissions)?;
-        }
         if self.preserve_ownerships {
             set_ownerships(
                 dst,
@@ -649,6 +646,9 @@ impl<'a> EntryFields<'a> {
                 self.header.uid().ok(),
                 self.header.gid().ok(),
             )?;
+        }
+        if let Ok(mode) = self.header.mode() {
+            set_perms(dst, Some(&mut f), mode, self.preserve_permissions)?;
         }
         if self.unpack_xattrs {
             set_xattrs(self, dst)?;
